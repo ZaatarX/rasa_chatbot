@@ -1,16 +1,5 @@
-# This files contains your custom actions which can be used to run
-# custom Python code.
-#
-# See this guide on how to implement these action:
-# https://rasa.com/docs/rasa/custom-actions
-
-# This is a simple example for a custom action which utters "Hello World!"
-
 import json
 import requests
-import httpx
-import mysql.connector
-from mysql.connector import errorcode
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
@@ -23,12 +12,14 @@ class ActionGiveBalanceRequest(Action):
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker,
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
-        account_number = tracker.get_slot("account_number")
+
+        username = tracker.get_slot("username")
+        password = tracker.get_slot("password")
 
         payload = {
             "userLogin": {
-                "userIdentifier": "syn17",
-                "password": "123456"
+                "userIdentifier": username,
+                "password": password
             }
         }
 
@@ -41,8 +32,6 @@ class ActionGiveBalanceRequest(Action):
             "{\"platform\": \"CORE\", \"userLanguage\": \"en\"}"
         }
 
-        #client = httpx.Client()
-        close_client = True
         url = "https://unicoredemomaia.westus2.cloudapp.azure.com:3081/callservice"
 
         try:
@@ -56,14 +45,17 @@ class ActionGiveBalanceRequest(Action):
             print("res: ", res)
 
             if res['errorCode'] == 90000:
-                sessionToken = res['additionalData']['output']['sessionToken']
+                SlotSet('sessionToken',
+                        res['additionalData']['output']['sessionToken'])
 
                 dispatcher.utter_message(
-                    text="Your session token is: {}".format(sessionToken))
+                    text="Hi, {}! Do you want me to check your balance?".
+                    format(username))
             else:
                 print("error.")
                 dispatcher.utter_message(
-                    text="There was an error: {}".format(res.status_code))
+                    text="Seems like the credentials do not match our records 🙁"
+                )
 
         except requests.ConnectionError as exc:
             print(f"An error occured while requesting {exc.errno!r}.")
@@ -73,6 +65,9 @@ class ActionGiveBalanceRequest(Action):
             return []
 
 
+#import mysql.connector
+#from mysql.connector import errorcode
+'''
 class ActionGiveBalance(Action):
     def name(self) -> Text:
         return "action_give_balance"
@@ -113,3 +108,4 @@ class ActionGiveBalance(Action):
             my_conn.close()
 
         return []
+'''
