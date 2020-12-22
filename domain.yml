@@ -1,0 +1,78 @@
+version: "2.0"
+
+intents:
+  - greet
+  - check_balance
+  - give_account
+  - transfer_request
+  - goodbye
+  - affirm
+  - deny
+  - mood_great
+  - mood_unhappy
+  - bot_challenge
+  - grateful
+  - give_up
+  - chit_chat
+
+entities:
+  - account
+  - transfer_amount
+  - account_number
+
+slots:
+  account_number:
+    type: float
+  account:
+    type: text
+  transfer_amount:
+    type: float
+
+responses:
+  utter_greet:
+    - text: "Hey! I'm Pini! I can check your balance!"
+
+  utter_cheer_up:
+    - text: "Here is something to cheer you up:"
+      image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_did_that_help:
+    - text: "Did that help you?"
+
+  utter_happy:
+    - text: "Great, carry on!"
+
+  utter_chat:
+    - text: "All circuits are ready to work!"
+    - text: "Beep booping like a good jazz robot!"
+    - text: "Beb bop!"
+
+  utter_goodbye:
+    - text: "Bye, bye!"
+
+  utter_iamabot:
+    - text: "I am a bot, powered by Rasa."
+
+  utter_on_duty:
+    - text: "Sure can do!"
+    - text: "I'm on it!"
+    - text: "On it!"
+
+  utter_help:
+    - text: "Let me check you balance!"
+    - text: "I can check your balance!"
+
+  utter_ask_account:
+    - text: "What's your account number?"
+    - text: "I just need your account number, please."
+
+  utter_happy_to_help:
+    - text: "You're welcome! Have a nice day!"
+
+actions:
+  - action_give_balance
+  - action_give_balance_request
+
+session_config:
+  session_expiration_time: 60
+  carry_over_slots_to_new_session: true
