@@ -7,9 +7,8 @@
 # This is a simple example for a custom action which utters "Hello World!"
 
 import json
-from os import close
+import requests
 import httpx
-import asyncio
 import mysql.connector
 from mysql.connector import errorcode
 from typing import Any, Text, Dict, List
@@ -26,56 +25,52 @@ class ActionGiveBalanceRequest(Action):
             domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
         account_number = tracker.get_slot("account_number")
 
-        my_params = {
+        payload = {
             "userLogin": {
                 "userIdentifier": "syn17",
                 "password": "123456"
             }
         }
-        my_params = json.dumps(my_params)
 
-        my_headers = {
-            "Content-Type": "application/json",
-            "servicekey": "generateSessionToken",
-            "sessionObject": {
-                "platform": "CORE",
-                "userLanguage": "en"
-            }
+        payload = json.dumps(payload)
+
+        headers = {
+            'Content-Type': 'application/json',
+            'servicekey': 'generateSessionToken',
+            'sessionObject':
+            "{\"platform\": \"CORE\", \"userLanguage\": \"en\"}"
         }
-        my_headers = json.dumps(my_headers)
 
-        res = asyncio.run(self.get_res(my_params, my_headers))
-
-        print("res: ", res)
-
-        if res:
-            print("if 200")
-            sessionToken = "empty"
-
-            #for token in res['additionalData']:
-            #    sessionToken = token['sessionToken']
-
-            dispatcher.utter_message(
-                text="Your session token is: {}".format(sessionToken))
-
-        else:
-            print("error.")
-            dispatcher.utter_message(
-                text="There was an error: {}".format(res.status_code))
-
-        return []
-
-    async def get_res(self, my_params, my_headers):
-        client = httpx.AsyncClient()
+        #client = httpx.Client()
         close_client = True
-        url = "https://unicoredemomaia.westus2.cloudapp.azure.com:3081"
+        url = "https://unicoredemomaia.westus2.cloudapp.azure.com:3081/callservice"
 
-        res = await client.post(url, headers=my_headers, data=my_params)
+        try:
+            (res) = requests.post(url,
+                                  data=payload,
+                                  headers=headers,
+                                  verify=False)
 
-        if close_client:
-            await client.aclose()
+            res = json.loads(res.content)
 
-        return res
+            print("res: ", res)
+
+            if res['errorCode'] == 90000:
+                sessionToken = res['additionalData']['output']['sessionToken']
+
+                dispatcher.utter_message(
+                    text="Your session token is: {}".format(sessionToken))
+            else:
+                print("error.")
+                dispatcher.utter_message(
+                    text="There was an error: {}".format(res.status_code))
+
+        except requests.ConnectionError as exc:
+            print(f"An error occured while requesting {exc.errno!r}.")
+            dispatcher.utter_message(
+                text=f"An error occured while requesting {exc.errno!r}.")
+        finally:
+            return []
 
 
 class ActionGiveBalance(Action):
