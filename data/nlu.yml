@@ -25,6 +25,11 @@ nlu:
       - hello everybody
       - hello is anybody there
       - hello robot
+      - oi
+      - oy
+      - hola
+      - salam
+      - ola
 
   - intent: chit_chat
     examples: |

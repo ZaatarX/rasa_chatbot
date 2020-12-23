@@ -1,9 +1,11 @@
+import os
 import json
 import requests
 from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
+from dotenv import load_dotenv
 
 
 class ActionGiveBalanceRequest(Action):
@@ -32,7 +34,7 @@ class ActionGiveBalanceRequest(Action):
             "{\"platform\": \"CORE\", \"userLanguage\": \"en\"}"
         }
 
-        url = "https://unicoredemomaia.westus2.cloudapp.azure.com:3081/callservice"
+        url = os.getenv("HOST_URL")
 
         try:
             (res) = requests.post(url,
