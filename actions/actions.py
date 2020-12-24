@@ -2,7 +2,7 @@ import os
 import json
 import requests
 from typing import Any, Text, Dict
-from rasa_sdk import Action, Tracker
+from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
 from rasa_sdk.types import DomainDict
@@ -11,68 +11,101 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-class ValidateLoginForm(Action):
+class ValidateLoginForm(FormValidationAction):
     def name(self) -> Text:
         return "validate_login_form"
 
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker,
-            domain: DomainDict) -> Dict[Text, Any]:
+    def validate_username(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
 
-        username = tracker.get_slot("username")
-        password = tracker.get_slot("password")
-        userValue = None
-        passValue = None
+        print(tracker.get_slot("password"))
+        print(slot_value)
 
-        payload = {
-            "userLogin": {
-                "userIdentifier": username,
-                "password": password
+        if tracker.get_slot("password") is not None:
+            self.validate_password(Any, CollectingDispatcher, Tracker,
+                                   DomainDict)
+        else:
+            return {"username": slot_value}
+
+    def validate_password(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+
+        if tracker.get_slot("username") is not None:
+            username = tracker.get_slot("username")
+            password = tracker.get_slot("password")
+            userValue = None
+            passValue = None
+
+            print(username)
+            print("asdasdasd ".format(password))
+
+            payload = {
+                "userLogin": {
+                    "userIdentifier": username,
+                    "password": "123456"
+                }
             }
-        }
 
-        payload = json.dumps(payload)
+            payload = json.dumps(payload)
 
-        headers = {
-            'Content-Type': 'application/json',
-            'servicekey': 'generateSessionToken',
-            'sessionObject':
-            "{\"platform\": \"CORE\", \"userLanguage\": \"en\"}"
-        }
+            headers = {
+                'Content-Type':
+                'application/json',
+                'servicekey':
+                'generateSessionToken',
+                'sessionObject':
+                "{\"platform\": \"CORE\", \"userLanguage\": \"en\"}"
+            }
 
-        url = os.getenv("HOST_URL")
+            url = os.getenv("HOST_URL")
 
-        try:
-            res = requests.post(url=url,
-                                headers=headers,
-                                data=payload,
-                                verify=False)
+            try:
+                res = requests.post(url=url,
+                                    headers=headers,
+                                    data=payload,
+                                    verify=False)
 
-            res = json.loads(res.content)
+                res = json.loads(res.content)
 
-            print("res: ", res)
+                print("res: ", res)
 
-            if res['errorCode'] == 90000:
-                userValue = username
-                passValue = password
+                if res['errorCode'] == 90000:
+                    userValue = username
+                    passValue = password
 
-                SlotSet('is_authenticated', True)
-                SlotSet('sessionToken',
-                        res['additionalData']['output']['sessionToken'])
+                    SlotSet('is_authenticated', True)
+                    SlotSet('sessionToken',
+                            res['additionalData']['output']['sessionToken'])
 
+                    dispatcher.utter_message(
+                        text="Hi, {}! Do you want me to check your balance?".
+                        format(username))
+                else:
+                    dispatcher.utter_message(
+                        text=
+                        "Seems like the credentials do not match our records 🙁"
+                    )
+
+            except requests.ConnectionError as e:
+                print("Couldn't connect.".format(e))
                 dispatcher.utter_message(
-                    text="Hi, {}! Do you want me to check your balance?".
-                    format(username))
-            else:
-                dispatcher.utter_message(
-                    text="Seems like the credentials do not match our records 🙁"
+                    text=
+                    "I'm having some connectivity issues right now. Could you try later?."
                 )
-
-        except requests.ConnectionError as exc:
-            print(f"An error occured while requesting {exc.errno!r}.")
-            dispatcher.utter_message(
-                text=f"An error occured while requesting {exc.errno!r}.")
-        finally:
-            return {'username': userValue, 'password': passValue}
+            finally:
+                return {'username': userValue, 'password': passValue}
+        else:
+            return {"password": slot_value}
 
 
 #import mysql.connector

@@ -47,11 +47,11 @@ forms:
     username:
       - type: from_entity
         entity: username
-        intent: give_username
+        intent: inform
     password:
       - type: from_entity
         entity: password
-        intent: give_password
+        intent: inform
 
 responses:
   utter_greet:
@@ -65,7 +65,7 @@ responses:
     - text: "Could I have your username?"
 
   utter_ask_password:
-    - text: "I need your password, please:"
+    - text: "I need your password, please..."
 
   utter_did_that_help:
     - text: "Did that help you?"
