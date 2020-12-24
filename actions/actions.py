@@ -1,22 +1,27 @@
 import os
 import json
 import requests
-from typing import Any, Text, Dict, List
+from typing import Any, Text, Dict
 from rasa_sdk import Action, Tracker
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
+from rasa_sdk.types import DomainDict
 from dotenv import load_dotenv
 
+load_dotenv()
 
-class ActionGiveBalanceRequest(Action):
+
+class ValidateLoginForm(Action):
     def name(self) -> Text:
-        return "action_give_balance_request"
+        return "validate_login_form"
 
     def run(self, dispatcher: CollectingDispatcher, tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+            domain: DomainDict) -> Dict[Text, Any]:
 
         username = tracker.get_slot("username")
         password = tracker.get_slot("password")
+        userValue = None
+        passValue = None
 
         payload = {
             "userLogin": {
@@ -37,16 +42,20 @@ class ActionGiveBalanceRequest(Action):
         url = os.getenv("HOST_URL")
 
         try:
-            (res) = requests.post(url,
-                                  data=payload,
-                                  headers=headers,
-                                  verify=False)
+            res = requests.post(url=url,
+                                headers=headers,
+                                data=payload,
+                                verify=False)
 
             res = json.loads(res.content)
 
             print("res: ", res)
 
             if res['errorCode'] == 90000:
+                userValue = username
+                passValue = password
+
+                SlotSet('is_authenticated', True)
                 SlotSet('sessionToken',
                         res['additionalData']['output']['sessionToken'])
 
@@ -54,7 +63,6 @@ class ActionGiveBalanceRequest(Action):
                     text="Hi, {}! Do you want me to check your balance?".
                     format(username))
             else:
-                print("error.")
                 dispatcher.utter_message(
                     text="Seems like the credentials do not match our records 🙁"
                 )
@@ -64,7 +72,7 @@ class ActionGiveBalanceRequest(Action):
             dispatcher.utter_message(
                 text=f"An error occured while requesting {exc.errno!r}.")
         finally:
-            return []
+            return {'username': userValue, 'password': passValue}
 
 
 #import mysql.connector

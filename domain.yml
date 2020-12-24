@@ -14,11 +14,14 @@ intents:
   - grateful
   - give_up
   - chit_chat
+  - inform
 
 entities:
   - account
   - transfer_amount
   - account_number
+  - username
+  - password
 
 slots:
   account_number:
@@ -29,18 +32,40 @@ slots:
     type: float
   username:
     type: text
+    auto_fill: false
   password:
     type: text
+    auto_fill: false
   sessionToken:
     type: text
+  is_authenticated:
+    type: bool
+    initial_value: false
+
+forms:
+  login_form:
+    username:
+      - type: from_entity
+        entity: username
+        intent: give_username
+    password:
+      - type: from_entity
+        entity: password
+        intent: give_password
 
 responses:
   utter_greet:
-    - text: "Hey! I'm Pini! I can check your balance!"
+    - text: "Hey! I'm Pini!"
 
   utter_cheer_up:
     - text: "Here is something to cheer you up:"
       image: "https://i.imgur.com/nGF1K8f.jpg"
+
+  utter_ask_username:
+    - text: "Could I have your username?"
+
+  utter_ask_password:
+    - text: "I need your password, please:"
 
   utter_did_that_help:
     - text: "Did that help you?"
@@ -76,7 +101,7 @@ responses:
     - text: "You're welcome! Have a nice day!"
 
 actions:
-  - action_give_balance_request
+  - validate_login_form
   #- action_give_balance
 
 session_config:

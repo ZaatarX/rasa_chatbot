@@ -1,3 +1,19 @@
 version: "2.0"
 
 rules:
+  - rule: activate login
+    condition:
+      - slot_was_set:
+          - is_authenticated: false
+    steps:
+      - action: utter_greet
+      - action: login_form
+      - active_loop: login_form
+
+  - rule: login
+    condition:
+      - active_loop: null
+      - slot_was_set:
+          - is_authenticated: false
+    steps:
+      - action: validate_login_form
