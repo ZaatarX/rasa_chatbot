@@ -49,13 +49,17 @@ nlu:
       - yo how you doing
       - hello how are you
 
+  - regex: name
+    examples: |
+      - ^[\\p{L} .'-]+$
+
   - regex: username
     examples: |
-      - ^[a-z0-9]{4,20}$
+      - ^(?=.*[0-9])(?=.*[a-zA-Z])([a-zA-Z0-9]+){8,14}$
 
   - regex: password
     examples: |
-      - ^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,16}$
+      - ^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{6,16}$
 
   - regex: account_number
     examples: |
@@ -72,24 +76,42 @@ nlu:
 
   - intent: inform
     examples: |
-      - it's [ricardo10](username)
-      - my username is [rica12r10](username)
-      - [ricardo5asdasda10](username)
-      - [2asdasdadasdasdad10](username) is my username
-      - [rica2rdofadsldals10](username)
-      - username: [rfadl7allah10](username)
-      - it is [fasdasdasdasd10](username)
-      - my username is [1238213ricar](username)
+      - my name is [assaad fadlallah](name)
+      - i am [amy santiago](name)
+      - i'm [terry crews](name)
+      - i go by [raymond holt](name)
+      - [gina linetti](name)
+      - my name is [rosa diaz](name)
+      - i'm [charles boyle](name)
+      - [luciclea garcia](name)
+      - my name is [adnan moukkaden](name)
+      - i'm [salah dannoui](name)
+      - [bilal el samad](name)
+      - i'm called [tony njeim](name)
+      - [zeina harris](name)
+      - you can call me [karim saleh](name)
+      - [katia ghattas](name)
+      - [mike fadlallah](name)
+      - [disco strangler](name)
+      - it's [jake peralta](name)
+      - it's [feijao10](username)
+      - my username is [estresse90](username)
+      - [venusiana40](username)
+      - [panzaatarism10](username) is my username
+      - [assad10](username)
+      - username: [fadlallah10](username)
+      - it is [katiag10](username)
+      - my username is [donaluci](username)
       - [syn17](username)
       - [user1234](username)
       - it's [1232ricardo](username)
       - [ricarfadlal](username)
-      - it is [Testing193!](password)
+      - it is [Testing19!3](password)
       - my password is [asdasd122312!A](password)
       - it's: [_asdasdA1](password)
       - it's [trrtr49_a#A](password)
       - [Ricardo1](password)
-      - [$asdpassP2](password)
+      - [a$sdpassP2](password)
       - [lol1234)-asA](password)
       - [nevaskdm_)12R](password)
       - [testinG!321](password)

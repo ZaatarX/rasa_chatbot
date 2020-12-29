@@ -1,14 +1,34 @@
 version: "2.0"
 
 rules:
-  - rule: Activate login
+  - rule: activate name form
     steps:
       - intent: greet
       - action: utter_greet
+      - action: name_form
+      - active_loop: name_form
+
+  - rule: validate name form
+    condition:
+      - active_loop: name_form
+    steps:
+      - action: name_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: validate_name_form
+      - slot_was_set:
+          - matched: "ok"
+
+  - rule: activate login form
+    condition:
+      - active_loop: null
+    steps:
+      - intent: affirm
       - action: login_form
       - active_loop: login_form
 
-  - rule: Validate login
+  - rule: validate login form
     condition:
       - active_loop: login_form
     steps:
@@ -17,3 +37,5 @@ rules:
       - slot_was_set:
           - requested_slot: null
       - action: validate_login_form
+      - slot_was_set:
+          - is_authenticated: "ok"

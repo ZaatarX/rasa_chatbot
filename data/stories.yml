@@ -1,24 +1,47 @@
 version: "2.0"
 
 stories:
-  - story: check balance path 1
+  - story: greet user
     steps:
       - intent: greet
       - action: utter_greet
+      - action: name_form
+      - active_loop: name_form
+      - active_loop: null
+      - slot_was_set:
+          - name: "firstname lastname"
+      - action: validate_name_form
+      - slot_was_set:
+          - matched: "ok"
+      - checkpoint: greet_checkpoint
+
+  - story: ask login
+    steps:
+      - checkpoint: greet_checkpoint
+      - intent: affirm
       - action: login_form
       - active_loop: login_form
+      - active_loop: null
+      - slot_was_set:
+          - username: "user1234"
+          - password: "r1C@d0fdall#"
+      - action: validate_login_form
+      - slot_was_set:
+          - is_authenticated: "ok"
+      - checkpoint: logged_checkpoint
+
+  - story: logged user
+    steps:
+      - checkpoint: logged_checkpoint
       - intent: check_balance
         entities:
           - account: "balance"
-      - slot_was_set:
-          - account: "balance"
-      - action: utter_on_duty
       - action: utter_ask_account
       - intent: give_account
         entities:
           - account_number: 1234567891
       - slot_was_set:
           - account_number: 1234567891
-      #- action: action_give_balance_request
-      #- intent: grateful
       - action: utter_happy_to_help
+      - intent: goodbye
+      - action: utter_goodbye

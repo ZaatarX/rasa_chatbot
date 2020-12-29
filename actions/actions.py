@@ -1,7 +1,9 @@
 import os
 import json
 import requests
-from typing import Any, Text, Dict
+import mysql.connector
+from mysql.connector import errorcode
+from typing import Any, Text, Dict, List
 from rasa_sdk import Action, Tracker, FormValidationAction
 from rasa_sdk.executor import CollectingDispatcher
 from rasa_sdk.events import SlotSet
@@ -27,7 +29,7 @@ class ValidateLoginForm(FormValidationAction):
         print(slot_value)
 
         if tracker.get_slot("password") is not None:
-            self.validate_password(Any, CollectingDispatcher, Tracker,
+            self.validate_password(slot_value, CollectingDispatcher, Tracker,
                                    DomainDict)
         else:
             return {"username": slot_value}
@@ -47,7 +49,7 @@ class ValidateLoginForm(FormValidationAction):
             passValue = None
 
             print(username)
-            print("asdasdasd ".format(password))
+            print("asdasdasd {}".format(password))
 
             payload = {
                 "userLogin": {
@@ -77,48 +79,66 @@ class ValidateLoginForm(FormValidationAction):
 
                 res = json.loads(res.content)
 
-                print("res: ", res)
-
                 if res['errorCode'] == 90000:
                     userValue = username
                     passValue = password
 
-                    SlotSet('is_authenticated', True)
-                    SlotSet('sessionToken',
-                            res['additionalData']['output']['sessionToken'])
-
                     dispatcher.utter_message(
                         text="Hi, {}! Do you want me to check your balance?".
                         format(username))
+
+                    return {
+                        'password':
+                        passValue,
+                        'is_authenticated':
+                        "ok",
+                        'sessionToken':
+                        res['additionalData']['output']['sessionToken'],
+                        'username':
+                        userValue
+                    }
                 else:
                     dispatcher.utter_message(
                         text=
                         "Seems like the credentials do not match our records 🙁"
                     )
 
+                    return {'username': userValue, 'password': passValue}
+
             except requests.ConnectionError as e:
-                print("Couldn't connect.".format(e))
+                print("Couldn't connect: {}.".format(e))
                 dispatcher.utter_message(
                     text=
-                    "I'm having some connectivity issues right now. Could you try later?."
+                    "I'm having some connectivity issues right now. Could you try later?"
                 )
-            finally:
-                return {'username': userValue, 'password': passValue}
+
+                return {'password': slot_value}
+
         else:
             return {"password": slot_value}
 
 
-#import mysql.connector
-#from mysql.connector import errorcode
-'''
-class ActionGiveBalance(Action):
+class ValidateNameForm(FormValidationAction):
     def name(self) -> Text:
-        return "action_give_balance"
+        return "validate_name_form"
 
-    def run(self, dispatcher: CollectingDispatcher, tracker: Tracker,
-            domain: Dict[Text, Any]) -> List[Dict[Text, Any]]:
+    def validate_name(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
 
-        account_number = tracker.get_slot("account_number")
+        name = tracker.get_slot('name')
+        print(name)
+
+        split_name = name.split()
+
+        first_name = str(split_name[0])
+        last_name = str(split_name[1])
+
+        print(first_name)
 
         try:
             my_conn = mysql.connector.connect(host='localhost',
@@ -128,27 +148,41 @@ class ActionGiveBalance(Action):
 
             cursor = my_conn.cursor()
 
-            query = ("SELECT balance FROM balance WHERE account_number={}".
-                     format(account_number))
+            query = (
+                "SELECT * FROM clients WHERE first_name = '{}' AND last_name = '{}'"
+                .format(first_name, last_name))
 
             cursor.execute(query)
 
-            blc = 0.0
-
-            for balance in cursor:
-                blc = balance
-
             dispatcher.utter_message(
-                text="The balance for {} is: ${}".format(account_number, blc))
+                text=
+                "Hello, {}! It's so nice to have you back! Would you like to login?"
+                .format(name))
+
+            return {'matched': "ok", 'name': name}
+
+            #return {'name': name}
+
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Something is wrong with your user name or password")
+                dispatcher.utter_message(
+                    text=
+                    "Sorry, I'm facing some issues right now, please try again later..."
+                )
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
                 print("Database does not exist")
+                dispatcher.utter_message(
+                    text=
+                    "Sorry, I'm facing some issues right now, please try again later..."
+                )
             else:
                 print(err)
+                dispatcher.utter_message(
+                    text=
+                    "Sorry, I'm facing some issues right now, please try again later..."
+                )
         else:
             my_conn.close()
 
         return []
-'''

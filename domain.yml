@@ -22,6 +22,8 @@ entities:
   - account_number
   - username
   - password
+  - name
+  - PERSON
 
 slots:
   account_number:
@@ -30,6 +32,12 @@ slots:
     type: text
   transfer_amount:
     type: float
+  name:
+    type: text
+    auto_fill: false
+  matched:
+    type: text
+    auto_fill: false
   username:
     type: text
     auto_fill: false
@@ -39,10 +47,14 @@ slots:
   sessionToken:
     type: text
   is_authenticated:
-    type: bool
-    initial_value: false
+    type: text
+    auto_fill: false
 
 forms:
+  name_form:
+    name:
+      - type: from_entity
+        entity: PERSON
   login_form:
     username:
       - type: from_entity
@@ -57,9 +69,8 @@ responses:
   utter_greet:
     - text: "Hey! I'm Pini!"
 
-  utter_cheer_up:
-    - text: "Here is something to cheer you up:"
-      image: "https://i.imgur.com/nGF1K8f.jpg"
+  utter_ask_name:
+    - text: "What's your name?"
 
   utter_ask_username:
     - text: "Could I have your username?"
@@ -101,8 +112,8 @@ responses:
     - text: "You're welcome! Have a nice day!"
 
 actions:
+  - validate_name_form
   - validate_login_form
-  #- action_give_balance
 
 session_config:
   session_expiration_time: 540
