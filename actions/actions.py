@@ -25,7 +25,6 @@ class ValidateLoginForm(FormValidationAction):
         domain: DomainDict,
     ) -> Dict[Text, Any]:
 
-        print(tracker.get_slot("password"))
         print(slot_value)
 
         if tracker.get_slot("password") is not None:
@@ -154,14 +153,30 @@ class ValidateNameForm(FormValidationAction):
 
             cursor.execute(query)
 
+            q_name = list()
+
+            for i, row in enumerate(list(cursor.fetchall())):
+                print("row: {}".format(row[i]))
+                q_name.append(row[i])
+
+            if len(q_name) > 0:
+                print("Query result: {}".format(q_name[0]))
+
+                dispatcher.utter_message(
+                    text=
+                    "Hello, {}! It's so nice to have you back! Would you like to login?"
+                    .format(name))
+
+                my_conn.close()
+
+                return {'matched': "ok", 'name': name}
+
+            my_conn.close()
+
             dispatcher.utter_message(
-                text=
-                "Hello, {}! It's so nice to have you back! Would you like to login?"
-                .format(name))
+                text="Hello, {}! When is your birthday?".format(name))
 
-            return {'matched': "ok", 'name': name}
-
-            #return {'name': name}
+            return {'name': name}
 
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
@@ -182,7 +197,101 @@ class ValidateNameForm(FormValidationAction):
                     text=
                     "Sorry, I'm facing some issues right now, please try again later..."
                 )
-        else:
-            my_conn.close()
 
         return []
+
+
+class ValidateKnowForm(FormValidationAction):
+    def name(self) -> Text:
+        return "validate_know_form"
+
+    def validate_phone(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+
+        print(slot_value)
+
+        if tracker.get_slot("dob") is not None:
+            self.validate_dob(slot_value, CollectingDispatcher, Tracker,
+                              DomainDict)
+        else:
+            return {"phone": slot_value}
+
+    def validate_dob(
+        self,
+        slot_value: Any,
+        dispatcher: CollectingDispatcher,
+        tracker: Tracker,
+        domain: DomainDict,
+    ) -> Dict[Text, Any]:
+
+        if tracker.get_slot("phone") is not None:
+            phone = tracker.get_slot("phone")
+            dob = tracker.get_slot("dob")
+
+            try:
+                my_conn = mysql.connector.connect(host='localhost',
+                                                  user='root',
+                                                  password='admin',
+                                                  database='new_schema')
+
+                cursor = my_conn.cursor()
+
+                query = (
+                    "SELECT * FROM clients WHERE phone_number = '{}' AND dob = '{}'"
+                    .format(phone, dob))
+
+                cursor.execute(query)
+
+                q_name = list()
+
+                for i, row in enumerate(list(cursor.fetchall())):
+                    print("row: {}".format(row[i]))
+                    q_name.append(row[i])
+
+                if len(q_name) > 0:
+                    print("Query result: {}".format(q_name[0]))
+
+                    dispatcher.utter_message(
+                        text=
+                        "Hello, {}! It's so nice to have you back! Would you like to login?"
+                        .format(tracker.get_slot("name")))
+
+                    my_conn.close()
+
+                    return {'matched': "ok", 'phone': phone, 'dob': dob}
+
+                my_conn.close()
+
+                dispatcher.utter_message(
+                    text=
+                    "Seems like you're new around here, {}! What would like to know about The Bank?"
+                    .format(tracker.get_slot("name")))
+
+                return {'phone': phone, 'dob': dob}
+
+            except mysql.connector.Error as err:
+                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                    print("Something is wrong with your user name or password")
+                    dispatcher.utter_message(
+                        text=
+                        "Sorry, I'm facing some issues right now, please try again later..."
+                    )
+                elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                    print("Database does not exist")
+                    dispatcher.utter_message(
+                        text=
+                        "Sorry, I'm facing some issues right now, please try again later..."
+                    )
+                else:
+                    print(err)
+                    dispatcher.utter_message(
+                        text=
+                        "Sorry, I'm facing some issues right now, please try again later..."
+                    )
+
+            return []

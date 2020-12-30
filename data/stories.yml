@@ -1,7 +1,7 @@
 version: "2.0"
 
 stories:
-  - story: greet user
+  - story: login user - happy path
     steps:
       - intent: greet
       - action: utter_greet
@@ -13,11 +13,6 @@ stories:
       - action: validate_name_form
       - slot_was_set:
           - matched: "ok"
-      - checkpoint: greet_checkpoint
-
-  - story: ask login
-    steps:
-      - checkpoint: greet_checkpoint
       - intent: affirm
       - action: login_form
       - active_loop: login_form
@@ -28,20 +23,71 @@ stories:
       - action: validate_login_form
       - slot_was_set:
           - is_authenticated: "ok"
+          - sessionToken: "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInRva2VuSWQiOjM5NzksInBsYXRmb3JtIjoiQ09SRSIsImxvZ2luRGF0ZSI6Njc1MDkyOTgwMzg4MDQwMCwiZXhwIjoxNjA3MTcwNjgwfQ.Cb2t97JmiwqhNVmySS2_by-z332ZWU5WSKRAoO_8Iv8"
+          - username: "user1234"
+          - password: "r1C@d0fdall#"
       - checkpoint: logged_checkpoint
 
-  - story: logged user
+  - story: login user - longer path
     steps:
-      - checkpoint: logged_checkpoint
-      - intent: check_balance
-        entities:
-          - account: "balance"
-      - action: utter_ask_account
-      - intent: give_account
-        entities:
-          - account_number: 1234567891
+      - intent: greet
+      - action: utter_greet
+      - action: name_form
+      - active_loop: name_form
+      - active_loop: null
       - slot_was_set:
-          - account_number: 1234567891
-      - action: utter_happy_to_help
-      - intent: goodbye
-      - action: utter_goodbye
+          - name: "firstname lastname"
+      - action: validate_name_form
+      - slot_was_set:
+          - name: "firstname lastname"
+      - intent: give_phone
+      - action: know_form
+      - active_loop: know_form
+      - active_loop: null
+      - slot_was_set:
+          - dob: "1995/06/09"
+          - phone: "81/297-852"
+      - action: validate_know_form
+      - slot_was_set:
+          - dob: "1995/06/09"
+          - phone: "81/297-852"
+          - matched: "ok"
+      - intent: affirm
+      - action: login_form
+      - active_loop: login_form
+      - active_loop: null
+      - slot_was_set:
+          - username: "user1234"
+          - password: "r1C@d0fdall#"
+      - action: validate_login_form
+      - slot_was_set:
+          - is_authenticated: "ok"
+          - sessionToken: "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInRva2VuSWQiOjM5NzksInBsYXRmb3JtIjoiQ09SRSIsImxvZ2luRGF0ZSI6Njc1MDkyOTgwMzg4MDQwMCwiZXhwIjoxNjA3MTcwNjgwfQ.Cb2t97JmiwqhNVmySS2_by-z332ZWU5WSKRAoO_8Iv8"
+          - username: "user1234"
+          - password: "r1C@d0fdall#"
+      - checkpoint: logged_checkpoint
+
+  - story: falied login user
+    steps:
+      - intent: greet
+      - action: utter_greet
+      - action: name_form
+      - active_loop: name_form
+      - active_loop: null
+      - slot_was_set:
+          - name: "firstname lastname"
+      - action: validate_name_form
+      - slot_was_set:
+          - name: "firstname lastname"
+      - intent: give_phone
+      - action: know_form
+      - active_loop: know_form
+      - active_loop: null
+      - slot_was_set:
+          - dob: "1995/06/09"
+          - phone: "81/297-852"
+      - action: validate_know_form
+      - slot_was_set:
+          - dob: "1995/06/09"
+          - phone: "81/297-852"
+      - checkpoint: failed_checkpoint

@@ -12,6 +12,9 @@ pipeline:
   - name: SpacyEntityExtractor
   - name: SpacyFeaturizer
     pooling: mean
+  - name: "DucklingEntityExtractor"
+    url: "http://localhost:8000"
+    dimensions: ["Time", "PhoneNumber"]
   - name: RegexFeaturizer
   - name: LexicalSyntacticFeaturizer
   - name: CountVectorsFeaturizer

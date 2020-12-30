@@ -15,6 +15,7 @@ intents:
   - give_up
   - chit_chat
   - inform
+  - give_phone
 
 entities:
   - account
@@ -24,6 +25,9 @@ entities:
   - password
   - name
   - PERSON
+  - DATE
+  - Time
+  - PhoneNumber
 
 slots:
   account_number:
@@ -49,6 +53,12 @@ slots:
   is_authenticated:
     type: text
     auto_fill: false
+  dob:
+    type: text
+    auto_fill: false
+  phone:
+    type: text
+    auto_fill: false
 
 forms:
   name_form:
@@ -64,6 +74,13 @@ forms:
       - type: from_entity
         entity: password
         intent: inform
+  know_form:
+    dob:
+      - type: from_entity
+        entity: DATE
+    phone:
+      - type: from_entity
+        entity: PhoneNumber
 
 responses:
   utter_greet:
@@ -76,7 +93,13 @@ responses:
     - text: "Could I have your username?"
 
   utter_ask_password:
-    - text: "I need your password, please..."
+    - text: "And your password, please..."
+
+  utter_ask_phone:
+    - text: "What's your phone number?"
+
+  utter_ask_dob:
+    - text: "When were you born?"
 
   utter_did_that_help:
     - text: "Did that help you?"
@@ -114,6 +137,7 @@ responses:
 actions:
   - validate_name_form
   - validate_login_form
+  - validate_know_form
 
 session_config:
   session_expiration_time: 540

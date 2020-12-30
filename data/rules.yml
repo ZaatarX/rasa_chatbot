@@ -18,7 +18,7 @@ rules:
           - requested_slot: null
       - action: validate_name_form
       - slot_was_set:
-          - matched: "ok"
+          - name: "firstname lastname"
 
   - rule: activate login form
     condition:
@@ -38,4 +38,26 @@ rules:
           - requested_slot: null
       - action: validate_login_form
       - slot_was_set:
-          - is_authenticated: "ok"
+          - username: "user1234"
+          - password: "r1C@d0fdall#"
+
+  - rule: activate know form
+    condition:
+      - active_loop: null
+    steps:
+      - intent: give_phone
+      - action: know_form
+      - active_loop: know_form
+
+  - rule: validate_know_form
+    condition:
+      - active_loop: know_form
+    steps:
+      - action: know_form
+      - active_loop: null
+      - slot_was_set:
+          - requested_slot: null
+      - action: validate_know_form
+      - slot_was_set:
+          - dob: "1995/06/09"
+          - phone: "81/297-852"

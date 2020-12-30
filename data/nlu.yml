@@ -118,6 +118,20 @@ nlu:
       - [m40Was_ri1thd](password)
       - [_inda_asd3S](password)
 
+  - intent: give_phone
+    examples: |
+      - my phone is (961) 81 297 852
+      - 81/297-852
+      - 81 297-852
+      - 81297852
+      - it's 81297852
+      - it's 81 297-852
+      - it's 81/297-852
+      - it's (961) 81 297 852
+      - my phone is 81/297-852
+      - my phone is 81 297-852
+      - my phone is 81297852
+
   - intent: check_balance
     examples: |
       - how much do I have on my [savings]{"entity": "account"} account
