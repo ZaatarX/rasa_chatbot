@@ -23,7 +23,7 @@ stories:
       - action: validate_login_form
       - slot_was_set:
           - is_authenticated: "ok"
-          - sessionToken: "eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOjEsInRva2VuSWQiOjM5NzksInBsYXRmb3JtIjoiQ09SRSIsImxvZ2luRGF0ZSI6Njc1MDkyOTgwMzg4MDQwMCwiZXhwIjoxNjA3MTcwNjgwfQ.Cb2t97JmiwqhNVmySS2_by-z332ZWU5WSKRAoO_8Iv8"
+          - sessionToken: ""
           - username: "user1234"
           - password: "r1C@d0fdall#"
       - checkpoint: logged_checkpoint
